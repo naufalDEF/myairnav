@@ -66,6 +66,68 @@ class DocumentController extends Controller
     }
 
     /**
+ * Menampilkan form edit dokumen.
+ */
+    public function edit($id)
+    {
+        $document = Document::findOrFail($id);
+        return view('superadmin.documents.edit', compact('document'));
+    }
+
+    /**
+     * Menyimpan perubahan dokumen setelah diedit.
+     */
+    public function update(Request $request, $id)
+    {
+        $document = Document::findOrFail($id);
+
+        // Validasi input
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string',
+            'sop_type' => 'nullable|string|in:SOP ATS,SOP PTP,Tidak Keduanya',
+            'region' => 'nullable|string',
+            'file' => 'nullable|mimes:pdf,docx|max:5120', // File opsional
+            'note' => 'nullable|string',
+        ]);
+
+        // Cek apakah ada file baru diunggah
+        if ($request->hasFile('file')) {
+            // Hapus file lama dari storage
+            if (Storage::exists($document->file_path)) {
+                Storage::delete($document->file_path);
+            }
+
+            // Simpan file baru
+            $filePath = $request->file('file')->store('documents', 'public');
+            $fileType = $request->file('file')->getClientOriginalExtension();
+
+            // Update data dengan file baru
+            $document->update([
+                'title' => $request->title,
+                'category' => $request->category,
+                'sop_type' => $request->sop_type,
+                'region' => $request->region,
+                'file_path' => $filePath,
+                'file_type' => $fileType,
+                'note' => $request->note,
+            ]);
+        } else {
+            // Update data tanpa mengganti file
+            $document->update([
+                'title' => $request->title,
+                'category' => $request->category,
+                'sop_type' => $request->sop_type,
+                'region' => $request->region,
+                'note' => $request->note,
+            ]);
+        }
+
+        return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil diperbarui.');
+    }
+
+
+    /**
      * Menyimpan dokumen yang diunggah.
      */
     public function store(Request $request)

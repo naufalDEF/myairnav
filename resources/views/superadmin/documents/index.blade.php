@@ -87,7 +87,7 @@
                     <td>{{ $document->created_at->format('d M Y') }}</td>
                     <td>
                         <a href="{{ route('superadmin.documents.show', $document->id) }}" class="btn btn-sm btn-info">Detail</a>
-                        <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{{ route('superadmin.documents.edit', $document->id) }}" class="btn btn-sm btn-warning">Edit</a>
                         <form action="{{ route('superadmin.documents.destroy', $document->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
                             @csrf
                             @method('DELETE')
