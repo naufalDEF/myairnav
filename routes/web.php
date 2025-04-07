@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Superadmin\UserManagementController;
-use App\Http\Controllers\Superadmin\DocumentController;
+use App\Http\Controllers\Superadmin\DocumentController as SuperadminDocumentController;
+use App\Http\Controllers\Admin\DocumentController as AdminDocumentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,63 +12,74 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-// Rute Login dan Register (Tanpa Middleware)
+// ===================== RUTE LOGIN & LOGOUT ===================== //
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// Rute Dashboard berdasarkan Role
+// ===================== RUTE DASHBOARD BERDASARKAN ROLE ===================== //
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
-
-        if ($user->role === 'superadmin') {
-            return redirect()->route('superadmin.dashboard');
-        } elseif ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } else {
-            return redirect()->route('user.dashboard');
-        }
+        return match ($user->role) {
+            'superadmin' => redirect()->route('superadmin.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            default => redirect()->route('user.dashboard'),
+        };
     })->name('dashboard');
 });
 
-// Rute Superadmin
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::get('/superadmin/dashboard', function () {
-        return view('superadmin.dashboard');
-    })->name('superadmin.dashboard');
-});
-
-// Rute Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-});
-
-// Rute User Biasa
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/user/dashboard', function () {
-        return view('user.dashboard');
-    })->name('user.dashboard');
-});
-
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::prefix('superadmin/users')->name('superadmin.users.')->group(function () {
-        Route::get('/', [UserManagementController::class, 'index'])->name('index');
-        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
-        Route::post('/store', [UserManagementController::class, 'store'])->name('store');
-        Route::get('/edit/{user}', [UserManagementController::class, 'edit'])->name('edit');
-        Route::put('/update/{user}', [UserManagementController::class, 'update'])->name('update');
-        Route::delete('/delete/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
-    });
-});
-
-
+// ===================== RUTE SUPERADMIN ===================== //
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
-    Route::resource('documents', DocumentController::class);
+    Route::get('/dashboard', function () {
+        return view('superadmin.dashboard');
+    })->name('dashboard');
+
+    // Manajemen Users
+    Route::resource('users', UserManagementController::class);
+
+    // CRUD Dokumen (Superadmin)
+    Route::resource('documents', SuperadminDocumentController::class);
+    Route::post('/documents/bulk-download', [SuperadminDocumentController::class, 'bulkDownload'])->name('documents.bulkDownload');
+    Route::post('/documents/bulk-delete', [SuperadminDocumentController::class, 'bulkDelete'])->name('documents.bulkDelete');
+
+    // Submenu Dokumen (Teknik, Operasi, K3)
+    Route::get('/documents/{category}', [SuperadminDocumentController::class, 'showCategory'])
+        ->whereIn('category', ['teknik', 'operasi', 'k3'])
+        ->name('documents.category');
 });
 
+// ===================== RUTE ADMIN ===================== //
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
 
+    // Rute khusus untuk kategori dokumen sebelum Route Resource agar tidak tertimpa oleh metode `show`
+    Route::get('/documents/{category}', [AdminDocumentController::class, 'showCategory'])
+        ->whereIn('category', ['teknik', 'operasi', 'k3'])
+        ->name('documents.category');
 
-require __DIR__.'/auth.php';
+    // Manajemen Dokumen (Admin CRUD)
+    Route::resource('documents', AdminDocumentController::class);
+    Route::post('/documents/bulk-download', [AdminDocumentController::class, 'bulkDownload'])->name('documents.bulkDownload');
+    Route::post('/documents/bulk-delete', [AdminDocumentController::class, 'bulkDelete'])->name('documents.bulkDelete');
+
+});
+
+// ===================== RUTE USER ===================== //
+Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('user.dashboard');
+    })->name('dashboard');
+
+    // Daftar Dokumen (Hanya Bisa Lihat dan Download)
+    Route::get('/documents', [SuperadminDocumentController::class, 'userIndex'])->name('documents.index');
+
+    // Submenu Dokumen (Hanya Bisa Lihat Berdasarkan Kategori)
+    Route::get('/documents/{category}', [SuperadminDocumentController::class, 'showCategory'])
+        ->whereIn('category', ['teknik', 'operasi', 'k3'])
+        ->name('documents.category');
+});
+
+require __DIR__ . '/auth.php';

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container">
-        <h1>Welcome, Superadmin!</h1>
+        <h1>Welcome, {{ Auth::user()->name }}!</h1>
         <p>Ini adalah halaman dashboard Superadmin.</p>
         
         <div class="card mt-3">

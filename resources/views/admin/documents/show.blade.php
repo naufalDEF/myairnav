@@ -7,7 +7,7 @@
     <h1>Detail Dokumen</h1>
 
     <!-- Tombol Kembali -->
-    <a href="{{ route('superadmin.documents.index') }}" class="btn btn-secondary mb-3">← Kembali</a>
+    <a href="{{ route('admin.documents.index') }}" class="btn btn-secondary mb-3">← Kembali</a>
 
     <div class="row">
         <!-- Kolom Kiri: Metadata Dokumen -->

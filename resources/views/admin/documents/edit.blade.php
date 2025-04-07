@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form action="{{ route('superadmin.documents.update', $document->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.documents.update', $document->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -26,7 +26,7 @@
             <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $document->title) }}" required>
         </div>
 
-        <!-- Kategori Dokumen (Menggunakan Select Option) -->
+        <!-- Kategori Dokumen -->
         <div class="mb-3">
             <label for="category" class="form-label">Kategori</label>
             <select class="form-control" id="category" name="category" required onchange="toggleSOPFields()">
@@ -85,7 +85,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-        <a href="{{ route('superadmin.documents.index') }}" class="btn btn-secondary">Batal</a>
+        <a href="{{ route('admin.documents.index') }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 
@@ -102,8 +102,7 @@
             document.getElementById("region").value = "";
         }
     }
-    
-    // Jalankan fungsi saat halaman dimuat agar form SOP tampil jika kategori sudah BAB 7
+
     document.addEventListener("DOMContentLoaded", function() {
         toggleSOPFields();
     });

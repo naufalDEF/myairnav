@@ -10,11 +10,33 @@ use Illuminate\Support\Facades\Hash;
 class UserManagementController extends Controller
 {
     // Menampilkan daftar user
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', '!=', 'superadmin')->get(); // Exclude Superadmin
-        return view('superadmin.users.index', compact('users'));
+        $search = $request->input('search');
+        $role = $request->input('role');
+
+        // Query User (kecuali Superadmin)
+        $query = User::where('role', '!=', 'superadmin');
+
+        // Filter berdasarkan nama/email
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        // Filter berdasarkan role
+        if (!empty($role)) {
+            $query->where('role', $role);
+        }
+
+        // Gunakan pagination (10 item per halaman)
+        $users = $query->latest()->paginate(10);
+
+        return view('superadmin.users.index', compact('users', 'search', 'role'));
     }
+
 
     // Menampilkan form tambah user
     public function create()

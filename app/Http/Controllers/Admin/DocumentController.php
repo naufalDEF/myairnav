@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Superadmin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Response;
 use ZipArchive;
 use File;
 
 class DocumentController extends Controller
 {
     /**
-     * Menampilkan daftar dokumen di Dashboard Superadmin.
+     * Menampilkan daftar dokumen di Dashboard Admin.
      */
     public function index(Request $request)
     {
@@ -42,25 +41,54 @@ class DocumentController extends Controller
 
         $documents = $query->paginate(10);
 
-        return view('superadmin.documents.index', compact('documents', 'search', 'category', 'date', 'sort'));
+        return view('admin.documents.index', compact('documents', 'search', 'category', 'date', 'sort'));
     }
 
     public function show($id)
     {
         $document = Document::findOrFail($id);
         $document->file_url = Storage::url($document->file_path);
-        return view('superadmin.documents.show', compact('document'));
+
+        return view('admin.documents.show', compact('document'));
     }
 
     public function create()
     {
-        return view('superadmin.documents.create');
+        return view('admin.documents.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string',
+            'sop_type' => 'nullable|string|in:SOP ATS,SOP PTP,Tidak Keduanya',
+            'region' => 'nullable|string',
+            'file' => 'required|mimes:pdf,docx|max:5120',
+            'note' => 'nullable|string',
+        ]);
+
+        $filePath = $request->file('file')->store('documents', 'public');
+        $fileType = $request->file('file')->getClientOriginalExtension();
+
+        Document::create([
+            'title' => $request->title,
+            'category' => $request->category,
+            'sop_type' => $request->sop_type,
+            'region' => $request->region,
+            'file_path' => $filePath,
+            'file_type' => $fileType,
+            'uploaded_by' => Auth::id(),
+            'note' => $request->note,
+        ]);
+
+        return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil diupload.');
     }
 
     public function edit($id)
     {
         $document = Document::findOrFail($id);
-        return view('superadmin.documents.edit', compact('document'));
+        return view('admin.documents.edit', compact('document'));
     }
 
     public function update(Request $request, $id)
@@ -97,35 +125,7 @@ class DocumentController extends Controller
             $document->update($request->except('file'));
         }
 
-        return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil diperbarui.');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string',
-            'sop_type' => 'nullable|string|in:SOP ATS,SOP PTP,Tidak Keduanya',
-            'region' => 'nullable|string',
-            'file' => 'required|mimes:pdf,docx|max:5120',
-            'note' => 'nullable|string',
-        ]);
-
-        $filePath = $request->file('file')->store('documents', 'public');
-        $fileType = $request->file('file')->getClientOriginalExtension();
-
-        Document::create([
-            'title' => $request->title,
-            'category' => $request->category,
-            'sop_type' => $request->sop_type,
-            'region' => $request->region,
-            'file_path' => $filePath,
-            'file_type' => $fileType,
-            'uploaded_by' => Auth::id(),
-            'note' => $request->note,
-        ]);
-
-        return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil diupload.');
+        return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -138,7 +138,7 @@ class DocumentController extends Controller
 
         $document->delete();
 
-        return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil dihapus.');
+        return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil dihapus.');
     }
 
     public function bulkDownload(Request $request)
@@ -155,9 +155,9 @@ class DocumentController extends Controller
 
         $zipFileName = 'documents_' . time() . '.zip';
         $zipPath = storage_path('app/public/' . $zipFileName);
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
 
-        if ($zip->open($zipPath, \ZipArchive::CREATE) !== true) {
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
             return response()->json(['error' => 'Gagal membuat file ZIP.'], 500);
         }
 
@@ -166,11 +166,9 @@ class DocumentController extends Controller
         foreach ($documents as $document) {
             $filePath = storage_path('app/public/' . $document->file_path);
 
-            if (!file_exists($filePath)) {
-                continue;
+            if (file_exists($filePath)) {
+                $zip->addFile($filePath, basename($filePath));
             }
-
-            $zip->addFile($filePath, basename($filePath));
         }
 
         $zip->close();
@@ -205,21 +203,11 @@ class DocumentController extends Controller
     {
         // Validasi kategori agar hanya 'teknik', 'operasi', atau 'k3'
         if (!in_array($category, ['teknik', 'operasi', 'k3'])) {
-            abort(404);
+            abort(404); // Jika kategori tidak valid, tampilkan halaman 404
         }
 
-        return view("superadmin.documents.$category");
+        // Arahkan ke view berdasarkan kategori
+        return view("admin.documents.$category"); // Mengarah ke admin/documents/teknik.blade.php
     }
 
-    public function userIndex()
-    {
-        $documents = Document::paginate(10); // Hanya menampilkan daftar dokumen
-        return view('user.documents.index', compact('documents'));
-    }
-
-
-
-
-
-    
 }

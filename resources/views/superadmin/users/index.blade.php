@@ -6,12 +6,39 @@
 <div class="container">
     <h1>Manajemen User</h1>
 
+    <!-- Tombol Tambah User -->
     <a href="{{ route('superadmin.users.create') }}" class="btn btn-success mb-3">Tambah User</a>
 
+    <!-- Notifikasi Sukses -->
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <!-- Form Search & Filter -->
+    <form action="{{ route('superadmin.users.index') }}" method="GET" class="mb-4">
+        <div class="row">
+            <!-- Input Search -->
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Cari nama atau email..." value="{{ request('search') }}">
+            </div>
+
+            <!-- Filter Role -->
+            <div class="col-md-3">
+                <select name="role" class="form-control">
+                    <option value="">-- Semua Role --</option>
+                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                </select>
+            </div>
+
+            <!-- Tombol Submit -->
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Cari</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabel Manajemen User -->
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -23,9 +50,9 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($users as $key => $user)
+            @forelse($users as $key => $user)
                 <tr>
-                    <td>{{ $key + 1 }}</td>
+                    <td>{{ $users->firstItem() + $key }}</td> <!-- Gunakan firstItem() karena sudah pakai paginate -->
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
                     <td>{{ ucfirst($user->role) }}</td>
@@ -37,8 +64,18 @@
                         </form>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">Tidak ada data user</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center">
+        {{ $users->links('pagination::bootstrap-5') }}
+    </div>
+
 </div>
 @endsection

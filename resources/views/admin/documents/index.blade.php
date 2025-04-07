@@ -6,7 +6,7 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Daftar Dokumen</h1>
-        <a href="{{ route('superadmin.documents.create') }}" class="btn btn-primary">+ Tambah Dokumen</a>
+        <a href="{{ route('admin.documents.create') }}" class="btn btn-primary">+ Tambah Dokumen</a>
     </div>
 
     <!-- Notifikasi Sukses -->
@@ -15,7 +15,7 @@
     @endif
 
     <!-- Form Pencarian & Filter -->
-    <form action="{{ route('superadmin.documents.index') }}" method="GET" class="mb-4">
+    <form action="{{ route('admin.documents.index') }}" method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
                 <label for="search" class="form-label">Pencarian</label>
@@ -73,9 +73,9 @@
                     <td>{{ $document->user->name }}</td>
                     <td>{{ $document->created_at->format('d M Y') }}</td>
                     <td>
-                        <a href="{{ route('superadmin.documents.show', $document->id) }}" class="btn btn-sm btn-info">Detail</a>
-                        <a href="{{ route('superadmin.documents.edit', $document->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        <form action="{{ route('superadmin.documents.destroy', $document->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                        <a href="{{ route('admin.documents.show', $document->id) }}" class="btn btn-sm btn-info">Detail</a>
+                        <a href="{{ route('admin.documents.edit', $document->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                        <form action="{{ route('admin.documents.destroy', $document->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
@@ -86,11 +86,10 @@
         </tbody>
     </table>
 
-     <!-- Tombol Aksi Massal -->
-     <div class="mt-3" id="bulk-actions" style="display: none;">
+    <!-- Tombol Aksi Massal -->
+    <div class="mt-3" id="bulk-actions" style="display: none;">
         <button id="bulk-download" class="btn btn-success">Unduh Terpilih</button>
         <button id="bulk-delete" class="btn btn-danger">Hapus Terpilih</button>
-        
     </div>
 
     <!-- Pagination -->
@@ -120,10 +119,10 @@
             toggleBulkActions();
         });
 
-        toggleBulkActions(); // Panggil fungsi ini untuk memastikan tombol aksi massal tersembunyi saat pertama kali dimuat
+        toggleBulkActions();
     });
 
-        $('#bulk-download').on('click', function() {
+    $('#bulk-download').on('click', function() {
         let selectedDocs = $('.document-checkbox:checked').map(function() {
             return $(this).val();
         }).get();
@@ -134,7 +133,7 @@
         }
 
         $.ajax({
-            url: "{{ route('superadmin.documents.bulkDownload') }}",
+            url: "{{ route('admin.documents.bulkDownload') }}",
             method: "POST",
             data: {
                 _token: "{{ csrf_token() }}",
@@ -153,13 +152,13 @@
         });
     });
 
-        $('#bulk-delete').on('click', function() {
+    $('#bulk-delete').on('click', function() {
         let selectedDocs = $('.document-checkbox:checked').map(function() { return $(this).val(); }).get();
         if (selectedDocs.length === 0) return alert('Pilih minimal satu dokumen.');
         if (!confirm('Apakah Anda yakin ingin menghapus dokumen terpilih?')) return;
 
         $.ajax({
-            url: "{{ route('superadmin.documents.bulkDelete') }}",
+            url: "{{ route('admin.documents.bulkDelete') }}",
             method: "POST",
             data: { _token: "{{ csrf_token() }}", document_ids: selectedDocs },
             success: function(response) { alert(response.success); location.reload(); },

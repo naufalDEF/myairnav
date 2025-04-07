@@ -12,7 +12,7 @@
         </div>
     @endif
 
-    <form action="{{ route('superadmin.documents.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.documents.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <!-- Judul Dokumen -->
@@ -45,7 +45,6 @@
 
         <!-- Form Khusus BAB 7 -->
         <div id="sop_fields" style="display: none;">
-            <!-- SOP Type -->
             <div class="mb-3">
                 <label for="sop_type" class="form-label">Jenis SOP</label>
                 <select class="form-control" id="sop_type" name="sop_type">
@@ -55,7 +54,6 @@
                 </select>
             </div>
 
-            <!-- Region -->
             <div class="mb-3">
                 <label for="region" class="form-label">Wilayah</label>
                 <input type="text" class="form-control" id="region" name="region" placeholder="Masukkan Wilayah (Pontianak, Sintang, Ketapang, dll.)">
@@ -69,14 +67,13 @@
             <small class="text-muted">Maksimal ukuran file: 5MB</small>
         </div>
 
-
         <!-- Catatan (Opsional) -->
         <div class="mb-3">
             <label for="note" class="form-label">Catatan (Opsional)</label>
             <textarea class="form-control" id="note" name="note"></textarea>
         </div>
 
-        <a href="{{route('superadmin.documents.index')}}" class="btn btn-secondary">Kembali</a>
+        <a href="{{ route('admin.documents.index') }}" class="btn btn-secondary">Kembali</a>
         <button type="submit" class="btn btn-primary">Upload</button>
     </form>
 </div>
@@ -106,15 +103,13 @@
             }
         });
 
-        // Validasi sebelum submit form
         document.querySelector("form").addEventListener("submit", function (event) {
             var fileInput = document.getElementById("file");
             if (!fileInput.files.length) {
                 alert("Silakan pilih file untuk diunggah.");
-                event.preventDefault(); // Batalkan pengiriman form
+                event.preventDefault();
             }
         });
     });
 </script>
-
 @endsection
