@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Superadmin\UserManagementController;
 use App\Http\Controllers\Superadmin\DocumentController as SuperadminDocumentController;
 use App\Http\Controllers\Admin\DocumentController as AdminDocumentController;
+use App\Http\Controllers\User\DocumentController as UserDocumentController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,14 +41,17 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
     Route::resource('users', UserManagementController::class);
 
     // CRUD Dokumen (Superadmin)
-    Route::resource('documents', SuperadminDocumentController::class);
     Route::post('/documents/bulk-download', [SuperadminDocumentController::class, 'bulkDownload'])->name('documents.bulkDownload');
     Route::post('/documents/bulk-delete', [SuperadminDocumentController::class, 'bulkDelete'])->name('documents.bulkDelete');
 
-    // Submenu Dokumen (Teknik, Operasi, K3)
+    // Pindahkan ini ke atas sebelum resource
     Route::get('/documents/{category}', [SuperadminDocumentController::class, 'showCategory'])
         ->whereIn('category', ['teknik', 'operasi', 'k3'])
         ->name('documents.category');
+
+    // Baru di bawah ini
+    Route::resource('documents', SuperadminDocumentController::class);
+
 });
 
 // ===================== RUTE ADMIN ===================== //
@@ -73,13 +78,15 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
         return view('user.dashboard');
     })->name('dashboard');
 
-    // Daftar Dokumen (Hanya Bisa Lihat dan Download)
-    Route::get('/documents', [SuperadminDocumentController::class, 'userIndex'])->name('documents.index');
+
 
     // Submenu Dokumen (Hanya Bisa Lihat Berdasarkan Kategori)
-    Route::get('/documents/{category}', [SuperadminDocumentController::class, 'showCategory'])
+    Route::get('/documents/{category}', [UserDocumentController::class, 'showCategory'])
         ->whereIn('category', ['teknik', 'operasi', 'k3'])
         ->name('documents.category');
+
+    Route::resource('documents', UserDocumentController::class);
+
 });
 
 require __DIR__ . '/auth.php';

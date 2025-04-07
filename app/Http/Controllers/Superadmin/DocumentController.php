@@ -209,17 +209,8 @@ class DocumentController extends Controller
         }
 
         return view("superadmin.documents.$category");
+
     }
-
-    public function userIndex()
-    {
-        $documents = Document::paginate(10); // Hanya menampilkan daftar dokumen
-        return view('user.documents.index', compact('documents'));
-    }
-
-
-
-
 
     
 }
