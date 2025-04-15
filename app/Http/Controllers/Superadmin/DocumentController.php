@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Superadmin;
 
+use App\Notifications\DocumentActionNotification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Document;
@@ -96,6 +97,7 @@ class DocumentController extends Controller
         } else {
             $document->update($request->except('file'));
         }
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $document->title . '" berhasil diperbarui.'));
 
         return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil diperbarui.');
     }
@@ -114,7 +116,7 @@ class DocumentController extends Controller
         $filePath = $request->file('file')->store('documents', 'public');
         $fileType = $request->file('file')->getClientOriginalExtension();
 
-        Document::create([
+        $document = Document::create([
             'title' => $request->title,
             'category' => $request->category,
             'sop_type' => $request->sop_type,
@@ -124,6 +126,9 @@ class DocumentController extends Controller
             'uploaded_by' => Auth::id(),
             'note' => $request->note,
         ]);
+        
+        
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $document->title . '" berhasil diupload.'));
 
         return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil diupload.');
     }
@@ -137,6 +142,8 @@ class DocumentController extends Controller
         }
 
         $document->delete();
+
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $document->title . '" berhasil dihapus.'));
 
         return redirect()->route('superadmin.documents.index')->with('success', 'Dokumen berhasil dihapus.');
     }

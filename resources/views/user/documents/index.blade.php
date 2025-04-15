@@ -5,8 +5,10 @@
 @section('content')
 <div class="container">
     <!-- Notifikasi Sukses -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Daftar Dokumen</h1>
+    </div>
     
-    <h1>Daftar Dokumen</h1>
     <!-- Form Pencarian & Filter -->
     <form action="{{ route('user.documents.index') }}" method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
@@ -108,7 +110,7 @@
             toggleBulkActions();
         });
 
-        toggleBulkActions(); // Panggil fungsi ini untuk memastikan tombol aksi massal tersembunyi saat pertama kali dimuat
+        toggleBulkActions(); 
     });
 
         $('#bulk-download').on('click', function() {

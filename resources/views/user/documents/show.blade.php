@@ -43,10 +43,12 @@
                     @if($document->file_type === 'pdf')
                         <!-- Preview PDF -->
                         <iframe src="{{ asset('storage/' . $document->file_path) }}" width="100%" height="600px"></iframe>
+
                     @elseif($document->file_type === 'docx')
                         <!-- Jika file Word, berikan link download -->
                         <p>Dokumen ini adalah file Word (.docx). Silakan download untuk melihat.</p>
                         <a href="{{ asset('storage/' . $document->file_path) }}" class="btn btn-primary" download>Download Dokumen</a>
+
                     @else
                         <p>Preview tidak tersedia untuk format ini.</p>
                     @endif

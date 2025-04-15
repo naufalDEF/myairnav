@@ -11,7 +11,7 @@
             <div class="card-body">
                 <h5 class="card-title">Lihat Dokumen</h5>
                 <p class="card-text">User hanya bisa melihat dan mengunduh dokumen yang tersedia.</p>
-                <a href="#" class="btn btn-primary">Lihat Dokumen</a>
+                <a href="{{route('user.documents.index')}}" class="btn btn-primary">Lihat Dokumen</a>
             </div>
         </div>
     </div>

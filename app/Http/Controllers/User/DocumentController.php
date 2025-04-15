@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\DocumentActionNotification;
 use Illuminate\Http\Request;
 use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
@@ -120,5 +121,6 @@ class DocumentController extends Controller
         // Arahkan ke view berdasarkan kategori
         return view("user.documents.$category"); // Mengarah ke admin/documents/teknik.blade.php
     }
+
 
 }

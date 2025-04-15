@@ -11,6 +11,7 @@
             <div class="card-body">
                 <h5 class="card-title">Manajemen Admin</h5>
                 <p class="card-text">Superadmin dapat menambahkan dan mengelola akun Users.</p>
+                <a href="{{route('superadmin.documents.index')}}" class="btn btn-primary">Lihat Dokumen</a>
 
             </div>
         </div>

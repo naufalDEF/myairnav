@@ -11,7 +11,8 @@
             <div class="card-body">
                 <h5 class="card-title">Manajemen Dokumen</h5>
                 <p class="card-text">Admin dapat menambahkan, mengedit, dan menghapus dokumen.</p>
-                <a href="#" class="btn btn-primary">Kelola Dokumen</a>
+                <a href="{{route('admin.documents.index')}}" class="btn btn-primary">Lihat Dokumen</a>
+
             </div>
         </div>
     </div>

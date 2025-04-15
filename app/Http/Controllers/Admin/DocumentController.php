@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+
+use App\Notifications\DocumentActionNotification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Document;
@@ -81,6 +83,7 @@ class DocumentController extends Controller
             'uploaded_by' => Auth::id(),
             'note' => $request->note,
         ]);
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $request->title . '" berhasil diupload.'));
 
         return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil diupload.');
     }
@@ -124,6 +127,8 @@ class DocumentController extends Controller
         } else {
             $document->update($request->except('file'));
         }
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $document->title . '" berhasil diperbarui.'));
+
 
         return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil diperbarui.');
     }
@@ -137,6 +142,8 @@ class DocumentController extends Controller
         }
 
         $document->delete();
+
+        Auth::user()->notify(new DocumentActionNotification('Dokumen "' . $document->title . '" berhasil dihapus.'));
 
         return redirect()->route('admin.documents.index')->with('success', 'Dokumen berhasil dihapus.');
     }
